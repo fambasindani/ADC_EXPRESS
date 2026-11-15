@@ -86,7 +86,7 @@ export function VilleForm() {
             {error && <div className="sm:col-span-2"><Alert variant="error">{error}</Alert></div>}
             {errors && <div className="sm:col-span-2"><ErrorList errors={errors} /></div>}
             <div className="space-y-2">
-              <Label>Province</Label>
+              <Label required>Province</Label>
               <Select value={form.province_id} onValueChange={(v) => setForm((f) => ({ ...f, province_id: v }))}>
                 <SelectTrigger><SelectValue placeholder="Sélectionner" /></SelectTrigger>
                 <SelectContent>{provinces.map((p) => <SelectItem key={p.id} value={String(p.id)}>{p.nom}</SelectItem>)}</SelectContent>

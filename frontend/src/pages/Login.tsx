@@ -114,7 +114,7 @@ export function Login() {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Adresse Email Professionnelle *</Label>
+                  <Label>Adresse Email Professionnelle</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <Input
@@ -131,7 +131,7 @@ export function Login() {
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label>Mot de passe *</Label>
+                    <Label>Mot de passe</Label>
                     <button type="button" className="text-xs font-semibold text-brand-red" onClick={() => setError('Veuillez contacter l\'administrateur Siège Gombe pour réinitialiser votre mot de passe.')}>
                       Mot de passe oublié ?
                     </button>

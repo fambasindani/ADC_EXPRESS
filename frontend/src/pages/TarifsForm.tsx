@@ -139,14 +139,14 @@ export function TarifsForm() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Service</Label>
+              <Label required>Service</Label>
               <Select value={form.service_id} onValueChange={(v) => setForm((f) => ({ ...f, service_id: v }))}>
                 <SelectTrigger><SelectValue placeholder="Sélectionner" /></SelectTrigger>
                 <SelectContent>{services.map((s) => <SelectItem key={s.id} value={String(s.id)}>{s.libelle}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Devise</Label>
+              <Label required>Devise</Label>
               <Select value={form.devise_code} onValueChange={(v) => setForm((f) => ({ ...f, devise_code: v }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{devises.map((d) => <SelectItem key={d.code} value={d.code}>{d.nom}</SelectItem>)}</SelectContent>

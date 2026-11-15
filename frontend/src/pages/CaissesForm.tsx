@@ -137,7 +137,7 @@ export function CaissesForm() {
               {error && <div className="sm:col-span-2"><Alert variant="error">{error}</Alert></div>}
               {errors && <div className="sm:col-span-2"><ErrorList errors={errors} /></div>}
               <div className="space-y-2">
-                <Label>Agence</Label>
+                <Label required>Agence</Label>
                 <Select value={form.agence_id} onValueChange={(v) => setForm((f) => ({ ...f, agence_id: v }))}>
                   <SelectTrigger><SelectValue placeholder="Sélectionner" /></SelectTrigger>
                   <SelectContent>{options.agences.map((a) => <SelectItem key={a.id} value={String(a.id)}>{a.nom}</SelectItem>)}</SelectContent>
@@ -146,7 +146,7 @@ export function CaissesForm() {
               <div className="space-y-2"><Label>Code</Label><Input required value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))} /></div>
               <div className="space-y-2"><Label>Libellé</Label><Input required value={form.libelle} onChange={(e) => setForm((f) => ({ ...f, libelle: e.target.value }))} /></div>
               <div className="space-y-2">
-                <Label>Devise</Label>
+                <Label required>Devise</Label>
                 <Select value={form.devise_code} onValueChange={(v) => setForm((f) => ({ ...f, devise_code: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>{options.devises.map((d) => <SelectItem key={d.code} value={d.code}>{d.nom}</SelectItem>)}</SelectContent>

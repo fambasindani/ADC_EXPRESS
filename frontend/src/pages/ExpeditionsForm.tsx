@@ -136,14 +136,14 @@ export function ExpeditionsForm() {
               </div>
             )}
             <div className="space-y-2">
-              <Label>Agence départ</Label>
+              <Label required>Agence départ</Label>
               <Select value={form.agence_depart_id} onValueChange={(v) => setForm((f) => ({ ...f, agence_depart_id: v }))} disabled={bloque}>
                 <SelectTrigger><SelectValue placeholder="Sélectionner" /></SelectTrigger>
                 <SelectContent>{agences.map((a) => <SelectItem key={a.id} value={String(a.id)}>{a.nom}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Agence arrivée</Label>
+              <Label required>Agence arrivée</Label>
               <Select value={form.agence_arrivee_id} onValueChange={(v) => setForm((f) => ({ ...f, agence_arrivee_id: v }))} disabled={bloque}>
                 <SelectTrigger><SelectValue placeholder="Sélectionner" /></SelectTrigger>
                 <SelectContent>{agences.map((a) => <SelectItem key={a.id} value={String(a.id)}>{a.nom}</SelectItem>)}</SelectContent>

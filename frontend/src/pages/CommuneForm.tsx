@@ -86,7 +86,7 @@ export function CommuneForm() {
             {error && <div className="sm:col-span-2"><Alert variant="error">{error}</Alert></div>}
             {errors && <div className="sm:col-span-2"><ErrorList errors={errors} /></div>}
             <div className="space-y-2">
-              <Label>Ville</Label>
+              <Label required>Ville</Label>
               <Select value={form.ville_id} onValueChange={(v) => setForm((f) => ({ ...f, ville_id: v }))}>
                 <SelectTrigger><SelectValue placeholder="Sélectionner" /></SelectTrigger>
                 <SelectContent>{villes.map((v) => <SelectItem key={v.id} value={String(v.id)}>{v.nom}</SelectItem>)}</SelectContent>

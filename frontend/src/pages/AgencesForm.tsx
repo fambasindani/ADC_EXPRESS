@@ -208,7 +208,7 @@ export function AgencesForm() {
               </div>
 
               <div className="space-y-2">
-                <Label>Province</Label>
+                <Label required>Province</Label>
                 <Select value={form.province_id || undefined} onValueChange={changeProvince}>
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionner une province" />
@@ -224,7 +224,7 @@ export function AgencesForm() {
               </div>
 
               <div className="space-y-2">
-                <Label>Ville</Label>
+                <Label required>Ville</Label>
                 <Select value={form.ville_id || undefined} onValueChange={changeVille}>
                   <SelectTrigger>
                     <SelectValue placeholder={form.province_id ? 'Sélectionner une ville' : 'Choisir d’abord une province'} />

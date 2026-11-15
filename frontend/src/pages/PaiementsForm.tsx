@@ -227,7 +227,7 @@ export function PaiementsForm() {
             )}
 
             <div className="space-y-2 sm:col-span-2">
-              <Label>Colis</Label>
+              <Label required>Colis</Label>
               <Combobox
                 options={options}
                 value={form.colis_id}
@@ -296,7 +296,7 @@ export function PaiementsForm() {
             </div>
 
             <div className="space-y-2">
-              <Label>Devise</Label>
+              <Label required>Devise</Label>
               <Select
                 value={form.devise_code}
                 onValueChange={(v) => setForm((f) => ({ ...f, devise_code: v }))}
@@ -317,7 +317,7 @@ export function PaiementsForm() {
             </div>
 
             <div className="space-y-2">
-              <Label>Mode de paiement</Label>
+              <Label required>Mode de paiement</Label>
               <Select
                 value={form.mode_paiement_id}
                 onValueChange={(v) => setForm((f) => ({ ...f, mode_paiement_id: v }))}
@@ -337,7 +337,7 @@ export function PaiementsForm() {
             </div>
 
             <div className="space-y-2">
-              <Label>Moment</Label>
+              <Label required>Moment</Label>
               <Select
                 value={form.moment_paiement}
                 onValueChange={(v) => setForm((f) => ({ ...f, moment_paiement: v }))}

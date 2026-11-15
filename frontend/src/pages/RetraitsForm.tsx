@@ -183,7 +183,7 @@ export function RetraitsForm() {
               )}
 
               <div className="space-y-2 sm:col-span-2">
-                <Label>Colis (éligibles)</Label>
+                <Label required>Colis (éligibles)</Label>
                 <Combobox
                   options={options}
                   value={form.colis_id}

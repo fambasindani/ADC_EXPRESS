@@ -245,7 +245,7 @@ export function LivraisonsForm() {
               )}
 
               <div className="space-y-2 sm:col-span-2">
-                <Label>Colis</Label>
+                <Label required>Colis</Label>
                 {isEdit ? (
                   <p className="font-mono text-sm font-semibold text-brand-dark">
                     {selected?.numero_suivi ?? `#${form.colis_id}`}
@@ -312,7 +312,7 @@ export function LivraisonsForm() {
               )}
 
               <div className="space-y-2">
-                <Label>Livreur</Label>
+                <Label required>Livreur</Label>
                 <Select
                   value={form.livreur_id || undefined}
                   onValueChange={(v) => setForm((f) => ({ ...f, livreur_id: v }))}
@@ -333,7 +333,7 @@ export function LivraisonsForm() {
               </div>
 
               <div className="space-y-2">
-                <Label>Devise des frais</Label>
+                <Label required>Devise des frais</Label>
                 <Select
                   value={form.devise_code}
                   onValueChange={(v) => setForm((f) => ({ ...f, devise_code: v }))}

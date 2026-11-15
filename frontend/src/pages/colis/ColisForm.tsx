@@ -279,7 +279,7 @@ export function ColisForm() {
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label>Agence de dépôt</Label>
+              <Label required>Agence de dépôt</Label>
               <Select value={form.agence_depot_id} onValueChange={(v) => update('agence_depot_id', v)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionner" />
@@ -294,7 +294,7 @@ export function ColisForm() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Agence de destination</Label>
+              <Label required>Agence de destination</Label>
               <Select value={form.agence_destination_id} onValueChange={(v) => update('agence_destination_id', v)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionner" />
@@ -309,7 +309,7 @@ export function ColisForm() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Type de colis</Label>
+              <Label required>Type de colis</Label>
               <Select value={form.type_colis_id} onValueChange={(v) => update('type_colis_id', v)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionner" />
@@ -324,7 +324,7 @@ export function ColisForm() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Service de transport</Label>
+              <Label required>Service de transport</Label>
               <Select value={form.service_id} onValueChange={(v) => update('service_id', v)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionner" />
@@ -375,7 +375,7 @@ export function ColisForm() {
               <Input type="number" step="0.01" min="0" value={form.hauteur_cm} onChange={(e) => update('hauteur_cm', e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label>Mode de facturation</Label>
+              <Label required>Mode de facturation</Label>
               <Select value={form.mode_facturation} onValueChange={(v) => update('mode_facturation', v)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -394,7 +394,7 @@ export function ColisForm() {
               <Input required type="number" step="0.01" min="0" value={form.montant_transport} onChange={(e) => update('montant_transport', e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label>Devise de paiement</Label>
+              <Label required>Devise de paiement</Label>
               <Select value={form.devise_paiement} onValueChange={(v) => update('devise_paiement', v)}>
                 <SelectTrigger>
                   <SelectValue />

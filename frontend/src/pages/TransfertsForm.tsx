@@ -216,7 +216,7 @@ export function TransfertsForm() {
               )}
 
               <div className="space-y-2 sm:col-span-2">
-                <Label>Colis</Label>
+                <Label required>Colis</Label>
                 {isEdit ? (
                   <p className="font-mono text-sm font-semibold text-brand-dark">
                     {selected?.numero_suivi ?? `#${form.colis_id}`}
@@ -269,7 +269,7 @@ export function TransfertsForm() {
               </div>
 
               <div className="space-y-2">
-                <Label>Agence d'arrivée</Label>
+                <Label required>Agence d'arrivée</Label>
                 <Select
                   value={form.agence_arrivee_id || undefined}
                   onValueChange={(v) => setForm((f) => ({ ...f, agence_arrivee_id: v }))}

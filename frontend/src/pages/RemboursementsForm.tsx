@@ -169,7 +169,7 @@ export function RemboursementsForm() {
                 </div>
               )}
               <div className="space-y-2 sm:col-span-3">
-                <Label>Paiement</Label>
+                <Label required>Paiement</Label>
                 {isEdit ? (
                   <Input value={paiementLabel} readOnly disabled />
                 ) : (

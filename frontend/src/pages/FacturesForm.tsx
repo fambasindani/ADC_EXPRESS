@@ -171,7 +171,7 @@ export function FacturesForm() {
               {error && <div className="sm:col-span-3"><Alert variant="error">{error}</Alert></div>}
               {errors && <div className="sm:col-span-3"><ErrorList errors={errors} /></div>}
               <div className="space-y-2">
-                <Label>Colis</Label>
+                <Label required>Colis</Label>
                 {isEdit ? (
                   <Input value={colisLabel} readOnly disabled />
                 ) : (
@@ -191,7 +191,7 @@ export function FacturesForm() {
               </div>
               <div className="space-y-2"><Label>Montant total</Label><Input required type="number" step="0.01" value={form.montant_total} onChange={(e) => setForm((f) => ({ ...f, montant_total: e.target.value }))} /></div>
               <div className="space-y-2">
-                <Label>Devise</Label>
+                <Label required>Devise</Label>
                 <Select value={form.devise_code} onValueChange={(v) => setForm((f) => ({ ...f, devise_code: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>{devises.map((d) => <SelectItem key={d.code} value={d.code}>{d.nom}</SelectItem>)}</SelectContent>

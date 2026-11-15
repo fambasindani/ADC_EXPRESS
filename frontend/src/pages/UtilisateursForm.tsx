@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
-const empty = { nom: '', postnom: '', prenom: '', email: '', telephone: '', password: '', agence_id: '' }
+const empty = { nom: '', postnom: '', prenom: '', email: '', telephone: '', password: '', agence_id: '', role_id: '' }
 
 export function UtilisateursForm() {
   const navigate = useNavigate()
@@ -29,13 +29,20 @@ export function UtilisateursForm() {
   const isEdit = Boolean(id)
   const { confirm, dialog } = useConfirm()
   const [agences, setAgences] = useState<{ id: number; nom: string }[]>([])
+  const [roles, setRoles] = useState<{ id: number; code: string; nom: string }[]>([])
   const [form, setForm] = useState(empty)
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string[]> | undefined>()
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    api.get<{ id: number; nom: string }[]>('/agences').then((r) => setAgences(r.data))
+    api.get<{
+      agences: { id: number; code: string; nom: string }[]
+      roles: { id: number; code: string; nom: string }[]
+    }>('/users/form-data').then((res) => {
+      setAgences(res.data.agences)
+      setRoles(res.data.roles)
+    })
   }, [])
 
   useEffect(() => {
@@ -50,6 +57,7 @@ export function UtilisateursForm() {
           telephone: u.telephone ?? '',
           password: '',
           agence_id: u.agence_id ? String(u.agence_id) : '',
+          role_id: u.roles?.[0]?.id ? String(u.roles[0].id) : '',
         })
       })
     }
@@ -57,6 +65,10 @@ export function UtilisateursForm() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!form.role_id) {
+      setError('Sélectionnez un rôle pour cet utilisateur.')
+      return
+    }
     confirm(
       { title: isEdit ? 'Enregistrer les modifications ?' : 'Ajouter cet enregistrement ?', description: 'Voulez-vous vraiment poursuivre ?' },
       save,
@@ -74,6 +86,7 @@ export function UtilisateursForm() {
       email: form.email,
       telephone: form.telephone || null,
       agence_id: form.agence_id ? Number(form.agence_id) : null,
+      role_id: Number(form.role_id),
     }
     if (form.password) payload.password = form.password
     try {
@@ -107,6 +120,13 @@ export function UtilisateursForm() {
             <div className="space-y-2"><Label>E-mail</Label><Input required type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} /></div>
             <div className="space-y-2"><Label>Téléphone</Label><Input value={form.telephone} onChange={(e) => setForm((f) => ({ ...f, telephone: e.target.value }))} /></div>
             <div className="space-y-2"><Label>Mot de passe {isEdit && '(laisser vide pour conserver)'}</Label><Input type="password" required={!isEdit} value={form.password} onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))} /></div>
+            <div className="space-y-2">
+              <Label required>Rôle</Label>
+              <Select value={form.role_id} onValueChange={(v) => setForm((f) => ({ ...f, role_id: v }))}>
+                <SelectTrigger><SelectValue placeholder="Sélectionner un rôle" /></SelectTrigger>
+                <SelectContent>{roles.map((r) => <SelectItem key={r.id} value={String(r.id)}>{r.nom} ({r.code})</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
             <div className="space-y-2">
               <Label>Agence</Label>
               <Select value={form.agence_id} onValueChange={(v) => setForm((f) => ({ ...f, agence_id: v }))}>

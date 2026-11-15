@@ -84,7 +84,7 @@ export function ModePaiementForm() {
             <div className="space-y-2"><Label>Code</Label><Input required value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))} /></div>
             <div className="space-y-2"><Label>Libellé</Label><Input required value={form.libelle} onChange={(e) => setForm((f) => ({ ...f, libelle: e.target.value }))} /></div>
             <div className="space-y-2">
-              <Label>Catégorie</Label>
+              <Label required>Catégorie</Label>
               <Select value={form.categorie} onValueChange={(v) => setForm((f) => ({ ...f, categorie: v }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>

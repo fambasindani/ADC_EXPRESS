@@ -20,6 +20,16 @@
   }
 }
 
+/* Astérisque rouge automatique pour les champs HTML obligatoires.
+   Les listes déroulantes / combobox utilisent <Label required>. */
+label:has(+ input:required):not(:has([data-required-mark]))::after,
+label:has(+ textarea:required):not(:has([data-required-mark]))::after,
+label:has(+ select:required):not(:has([data-required-mark]))::after {
+  content: ' *';
+  color: #dc2626;
+  font-weight: 600;
+}
+
 /* Scrollbar discret */
 ::-webkit-scrollbar {
   width: 8px;
