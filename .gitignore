@@ -1,0 +1,19 @@
+# Dépendances et artefacts
+node_modules/
+vendor/
+dist/
+build/
+*.log
+
+# Environnements et secrets
+.env
+.env.*
+!.env.example
+
+# Système / éditeurs
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
