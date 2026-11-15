@@ -59,6 +59,7 @@ export function TransfertsForm() {
   const [colisEdit, setColisEdit] = useState<ColisDispo | null>(null)
   const [loading, setLoading] = useState(true)
   const [form, setForm] = useState(empty)
+  const [statut, setStatut] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string[]> | undefined>()
@@ -71,7 +72,10 @@ export function TransfertsForm() {
       try {
         const [agencesData, colisData, transfertRes] = await Promise.all([
           fetchAllPages<AgenceOption>('/agences', {}, { maxRows: 2000 }),
-          fetchAllPages<ColisDispo>('/transferts/colis-disponibles', {}, { maxRows: 5000 }),
+          // Les colis disponibles ne servent qu'à la création.
+          id
+            ? Promise.resolve([] as ColisDispo[])
+            : fetchAllPages<ColisDispo>('/transferts/colis-disponibles', {}, { maxRows: 5000 }),
           id ? api.get<TransfertData>(`/transferts/${id}`) : Promise.resolve(null),
         ])
         if (!active) return
@@ -80,6 +84,7 @@ export function TransfertsForm() {
 
         if (transfertRes) {
           const t = transfertRes.data
+          setStatut(t.statut)
           setForm({
             colis_id: String(t.colis_id),
             agence_depart_id: String(t.agence_depart_id),
@@ -129,9 +134,12 @@ export function TransfertsForm() {
 
   const agenceDepart = agences.find((a) => String(a.id) === form.agence_depart_id)
   const agencesArrivee = agences.filter((a) => String(a.id) !== form.agence_depart_id)
+  // Seuls les transferts EN_ATTENTE peuvent être modifiés (règle API).
+  const bloque = isEdit && statut !== null && statut !== 'EN_ATTENTE'
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (bloque) return
     if (!form.colis_id) {
       setError('Sélectionnez un colis.')
       return
@@ -150,11 +158,15 @@ export function TransfertsForm() {
     setSaving(true)
     setErrors(undefined)
     setError(null)
-    const payload = {
-      colis_id: Number(form.colis_id),
-      agence_depart_id: Number(form.agence_depart_id),
-      agence_arrivee_id: Number(form.agence_arrivee_id),
-    }
+    // À la modification, l'API n'accepte que l'agence d'arrivée
+    // (le colis et l'agence de départ sont figés).
+    const payload = isEdit
+      ? { agence_arrivee_id: Number(form.agence_arrivee_id) }
+      : {
+          colis_id: Number(form.colis_id),
+          agence_depart_id: Number(form.agence_depart_id),
+          agence_arrivee_id: Number(form.agence_arrivee_id),
+        }
     try {
       if (isEdit) await api.put(`/transferts/${id}`, payload)
       else await api.post('/transferts', payload)
@@ -193,6 +205,13 @@ export function TransfertsForm() {
               {errors && (
                 <div className="sm:col-span-2">
                   <ErrorList errors={errors} />
+                </div>
+              )}
+              {bloque && (
+                <div className="sm:col-span-2">
+                  <Alert variant="info">
+                    Ce transfert est en statut <strong>{statut}</strong> : il ne peut plus être modifié.
+                  </Alert>
                 </div>
               )}
 
@@ -254,6 +273,7 @@ export function TransfertsForm() {
                 <Select
                   value={form.agence_arrivee_id || undefined}
                   onValueChange={(v) => setForm((f) => ({ ...f, agence_arrivee_id: v }))}
+                  disabled={bloque}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionner une agence" />
@@ -269,7 +289,7 @@ export function TransfertsForm() {
               </div>
 
               <div className="flex justify-end gap-2 sm:col-span-2">
-                <Button type="submit" disabled={saving || !form.colis_id}>
+                <Button type="submit" disabled={saving || bloque || !form.colis_id}>
                   {saving && <Spinner />}
                   <Save className="h-4 w-4" /> Enregistrer
                 </Button>

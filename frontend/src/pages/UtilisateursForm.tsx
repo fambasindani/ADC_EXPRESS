@@ -7,7 +7,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { BackButton } from '@/components/BackButton'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { useConfirm } from '@/lib/useConfirm'
-import { ErrorList } from '@/components/Alert'
+import { Alert, ErrorList } from '@/components/Alert'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -32,6 +32,7 @@ export function UtilisateursForm() {
   const [form, setForm] = useState(empty)
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string[]> | undefined>()
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     api.get<{ id: number; nom: string }[]>('/agences').then((r) => setAgences(r.data))
@@ -64,6 +65,7 @@ export function UtilisateursForm() {
 
   async function save() {
     setSaving(true)
+    setError(null)
     setErrors(undefined)
     const payload: Record<string, unknown> = {
       nom: form.nom,
@@ -79,7 +81,11 @@ export function UtilisateursForm() {
       else await api.post('/users', payload)
       navigate('/utilisateurs')
     } catch (err) {
-      if (err && typeof err === 'object' && 'errors' in err) setErrors((err as { errors: Record<string, string[]> }).errors)
+      if (err && typeof err === 'object' && 'errors' in err) {
+        setErrors((err as { errors: Record<string, string[]> }).errors)
+      } else {
+        setError(err instanceof Error ? err.message : 'Enregistrement impossible.')
+      }
     } finally {
       setSaving(false)
     }
@@ -93,6 +99,7 @@ export function UtilisateursForm() {
         <CardHeader><CardTitle>Informations de l'utilisateur</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
+            {error && <div className="sm:col-span-2"><Alert variant="error">{error}</Alert></div>}
             {errors && <div className="sm:col-span-2"><ErrorList errors={errors} /></div>}
             <div className="space-y-2"><Label>Nom</Label><Input required value={form.nom} onChange={(e) => setForm((f) => ({ ...f, nom: e.target.value }))} /></div>
             <div className="space-y-2"><Label>Post-nom</Label><Input value={form.postnom} onChange={(e) => setForm((f) => ({ ...f, postnom: e.target.value }))} /></div>

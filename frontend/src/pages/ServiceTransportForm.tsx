@@ -7,7 +7,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { BackButton } from '@/components/BackButton'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { useConfirm } from '@/lib/useConfirm'
-import { ErrorList } from '@/components/Alert'
+import { Alert, ErrorList } from '@/components/Alert'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -25,6 +25,7 @@ export function ServiceTransportForm() {
   const [form, setForm] = useState(empty)
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string[]> | undefined>()
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (id) {
@@ -45,6 +46,7 @@ export function ServiceTransportForm() {
 
   async function save() {
     setSaving(true)
+    setError(null)
     setErrors(undefined)
     const payload = {
       code: form.code,
@@ -57,7 +59,11 @@ export function ServiceTransportForm() {
       else await api.post('/services-transport', payload)
       navigate('/references')
     } catch (err) {
-      if (err && typeof err === 'object' && 'errors' in err) setErrors((err as { errors: Record<string, string[]> }).errors)
+      if (err && typeof err === 'object' && 'errors' in err) {
+        setErrors((err as { errors: Record<string, string[]> }).errors)
+      } else {
+        setError(err instanceof Error ? err.message : 'Enregistrement impossible.')
+      }
     } finally {
       setSaving(false)
     }
@@ -71,6 +77,7 @@ export function ServiceTransportForm() {
         <CardHeader><CardTitle>Informations du service</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
+            {error && <div className="sm:col-span-2"><Alert variant="error">{error}</Alert></div>}
             {errors && <div className="sm:col-span-2"><ErrorList errors={errors} /></div>}
             <div className="space-y-2"><Label>Code</Label><Input required value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))} /></div>
             <div className="space-y-2"><Label>Libellé</Label><Input required value={form.libelle} onChange={(e) => setForm((f) => ({ ...f, libelle: e.target.value }))} /></div>

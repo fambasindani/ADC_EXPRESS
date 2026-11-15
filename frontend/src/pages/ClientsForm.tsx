@@ -8,7 +8,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { BackButton } from '@/components/BackButton'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { useConfirm } from '@/lib/useConfirm'
-import { ErrorList } from '@/components/Alert'
+import { Alert, ErrorList } from '@/components/Alert'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -39,6 +39,7 @@ export function ClientsForm() {
   const [form, setForm] = useState(empty)
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string[]> | undefined>()
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (id) {
@@ -66,13 +67,18 @@ export function ClientsForm() {
 
   async function save() {
     setSaving(true)
+    setError(null)
     setErrors(undefined)
     try {
       if (isEdit) await api.put(`/clients/${id}`, form)
       else await api.post('/clients', form)
       navigate('/clients')
     } catch (err) {
-      if (err && typeof err === 'object' && 'errors' in err) setErrors((err as { errors: Record<string, string[]> }).errors)
+      if (err && typeof err === 'object' && 'errors' in err) {
+        setErrors((err as { errors: Record<string, string[]> }).errors)
+      } else {
+        setError(err instanceof Error ? err.message : 'Enregistrement impossible.')
+      }
     } finally {
       setSaving(false)
     }
@@ -92,6 +98,7 @@ export function ClientsForm() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
+            {error && <div className="sm:col-span-2"><Alert variant="error">{error}</Alert></div>}
             {errors && <div className="sm:col-span-2"><ErrorList errors={errors} /></div>}
             <div className="space-y-2">
               <Label>Type</Label>

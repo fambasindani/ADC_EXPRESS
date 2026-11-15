@@ -8,7 +8,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { BackButton } from '@/components/BackButton'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { useConfirm } from '@/lib/useConfirm'
-import { ErrorList } from '@/components/Alert'
+import { Alert, ErrorList } from '@/components/Alert'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -33,6 +33,7 @@ export function VilleForm() {
   const [form, setForm] = useState(empty)
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string[]> | undefined>()
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchAllPages<{ id: number; nom: string }>('/provinces', {}, { maxRows: 500 }).then(setProvinces)
@@ -56,6 +57,7 @@ export function VilleForm() {
 
   async function save() {
     setSaving(true)
+    setError(null)
     setErrors(undefined)
     const payload = { province_id: Number(form.province_id), nom: form.nom }
     try {
@@ -63,7 +65,11 @@ export function VilleForm() {
       else await api.post('/villes', payload)
       navigate('/localisation')
     } catch (err) {
-      if (err && typeof err === 'object' && 'errors' in err) setErrors((err as { errors: Record<string, string[]> }).errors)
+      if (err && typeof err === 'object' && 'errors' in err) {
+        setErrors((err as { errors: Record<string, string[]> }).errors)
+      } else {
+        setError(err instanceof Error ? err.message : 'Enregistrement impossible.')
+      }
     } finally {
       setSaving(false)
     }
@@ -77,6 +83,7 @@ export function VilleForm() {
         <CardHeader><CardTitle>Informations de la ville</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
+            {error && <div className="sm:col-span-2"><Alert variant="error">{error}</Alert></div>}
             {errors && <div className="sm:col-span-2"><ErrorList errors={errors} /></div>}
             <div className="space-y-2">
               <Label>Province</Label>

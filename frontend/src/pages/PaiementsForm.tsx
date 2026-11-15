@@ -13,6 +13,7 @@ import { Alert, ErrorList } from '@/components/Alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Spinner } from '@/components/ui/spinner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -33,9 +34,20 @@ interface PaiementData {
   montant: string
   devise_code: string
   moment_paiement: string
+  statut: string
+  reference_externe: string | null
+  observations: string | null
 }
 
-const empty = { colis_id: '', montant: '', devise_code: 'CDF', mode_paiement_id: '', moment_paiement: 'DEPOT' }
+const empty = {
+  colis_id: '',
+  montant: '',
+  devise_code: 'CDF',
+  mode_paiement_id: '',
+  moment_paiement: 'DEPOT',
+  reference_externe: '',
+  observations: '',
+}
 
 export function PaiementsForm() {
   const navigate = useNavigate()
@@ -48,39 +60,54 @@ export function PaiementsForm() {
   const [selected, setSelected] = useState<Colis | null>(null)
   const [loadingColis, setLoadingColis] = useState(true)
   const [form, setForm] = useState(empty)
+  const [statutPaiement, setStatutPaiement] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string[]> | undefined>()
 
   useEffect(() => {
-    Promise.all([
-      api.get<{ id: number; code: string; libelle: string }[]>('/modes-paiement'),
-      api.get<{ code: string; nom: string }[]>('/devises'),
-      fetchAllPages<Colis>('/colis', { sort_by: 'date_depot', sort_dir: 'desc' }, { maxRows: 2000 }),
-    ])
-      .then(([m, d, colis]) => {
+    async function load() {
+      try {
+        const [m, d] = await Promise.all([
+          api.get<{ id: number; code: string; libelle: string }[]>('/modes-paiement'),
+          api.get<{ code: string; nom: string }[]>('/devises'),
+        ])
         setModes(m.data)
         setDevises(d.data)
-        setColisList(colis)
+
+        // La liste complète des colis n'est utile qu'à la création :
+        // en modification, le colis du paiement est chargé directement.
+        if (!id) {
+          const colis = await fetchAllPages<Colis>('/colis', { sort_by: 'date_depot', sort_dir: 'desc' }, { maxRows: 2000 })
+          setColisList(colis)
+        }
+
         // Espèces par défaut à la création (mode le plus courant).
         if (!id) {
           const especes = m.data.find((x) => x.code === 'ESPECES')
           if (especes) setForm((f) => (f.mode_paiement_id ? f : { ...f, mode_paiement_id: String(especes.id) }))
         }
-      })
-      .finally(() => setLoadingColis(false))
-  }, [])
+      } finally {
+        setLoadingColis(false)
+      }
+    }
+
+    load()
+  }, [id])
 
   useEffect(() => {
     if (!id) return
     api.get<PaiementData>(`/paiements/${id}`).then((res) => {
       const p = res.data
+      setStatutPaiement(p.statut)
       setForm({
         colis_id: String(p.colis_id),
         montant: p.montant,
         devise_code: p.devise_code,
         mode_paiement_id: String(p.mode_paiement_id),
         moment_paiement: p.moment_paiement,
+        reference_externe: p.reference_externe ?? '',
+        observations: p.observations ?? '',
       })
       // Récapitulatif du colis, sans écraser les valeurs du paiement existant.
       api.get<Colis>(`/colis/${p.colis_id}`).then((c) => setSelected(c.data)).catch(() => {})
@@ -137,13 +164,21 @@ export function PaiementsForm() {
     setSaving(true)
     setErrors(undefined)
     setError(null)
-    const payload = {
-      colis_id: Number(form.colis_id),
-      montant: Number(form.montant),
-      devise_code: form.devise_code,
-      mode_paiement_id: Number(form.mode_paiement_id),
-      moment_paiement: form.moment_paiement,
-    }
+    const payload = isEdit
+      ? {
+          montant: Number(form.montant),
+          reference_externe: form.reference_externe || null,
+          observations: form.observations || null,
+        }
+      : {
+          colis_id: Number(form.colis_id),
+          montant: Number(form.montant),
+          devise_code: form.devise_code,
+          mode_paiement_id: Number(form.mode_paiement_id),
+          moment_paiement: form.moment_paiement,
+          reference_externe: form.reference_externe || null,
+          observations: form.observations || null,
+        }
     try {
       if (isEdit) await api.put(`/paiements/${id}`, payload)
       else await api.post('/paiements', payload)
@@ -161,6 +196,8 @@ export function PaiementsForm() {
   const solde = selected?.solde ?? (selected ? Number(selected.montant_transport) : 0)
   const dejaPaye = selected?.montant_paye ?? 0
   const dejaSolde = selected ? solde <= 0 : false
+  // Un paiement validé ne peut plus être modifié financièrement (règle API).
+  const paiementValide = statutPaiement === 'VALIDE'
 
   return (
     <div className="page-container space-y-6">
@@ -171,6 +208,11 @@ export function PaiementsForm() {
       />
 
       {error && <Alert variant="error">{error}</Alert>}
+      {isEdit && paiementValide && (
+        <Alert variant="info">
+          Ce paiement est validé : seuls la référence externe et les observations sont modifiables.
+        </Alert>
+      )}
 
       <Card>
         <CardHeader>
@@ -190,7 +232,7 @@ export function PaiementsForm() {
                 options={options}
                 value={form.colis_id}
                 onChange={choisirColis}
-                disabled={loadingColis}
+                disabled={loadingColis || isEdit}
                 placeholder={loadingColis ? 'Chargement des colis…' : 'Rechercher par n° de suivi ou destinataire…'}
                 searchPlaceholder="N° suivi, nom ou téléphone…"
                 emptyText="Aucun colis trouvé"
@@ -246,6 +288,7 @@ export function PaiementsForm() {
                 min="0.01"
                 value={form.montant}
                 onChange={(e) => setForm((f) => ({ ...f, montant: e.target.value }))}
+                disabled={paiementValide}
               />
               {selected && (
                 <p className="text-xs text-slate-500">Solde restant à encaisser : {formatMoney(solde, selected.devise_paiement)}</p>
@@ -278,6 +321,7 @@ export function PaiementsForm() {
               <Select
                 value={form.mode_paiement_id}
                 onValueChange={(v) => setForm((f) => ({ ...f, mode_paiement_id: v }))}
+                disabled={isEdit}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionner" />
@@ -297,6 +341,7 @@ export function PaiementsForm() {
               <Select
                 value={form.moment_paiement}
                 onValueChange={(v) => setForm((f) => ({ ...f, moment_paiement: v }))}
+                disabled={isEdit}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -309,6 +354,24 @@ export function PaiementsForm() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Référence externe</Label>
+              <Input
+                value={form.reference_externe}
+                onChange={(e) => setForm((f) => ({ ...f, reference_externe: e.target.value }))}
+                placeholder="N° de transaction Mobile Money, bordereau…"
+              />
+            </div>
+
+            <div className="space-y-2 sm:col-span-2">
+              <Label>Observations</Label>
+              <Textarea
+                value={form.observations}
+                onChange={(e) => setForm((f) => ({ ...f, observations: e.target.value }))}
+                placeholder="Remarques (optionnel)"
+              />
             </div>
 
             <div className="flex justify-end gap-2 sm:col-span-2">

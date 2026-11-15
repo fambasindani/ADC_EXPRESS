@@ -7,7 +7,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { BackButton } from '@/components/BackButton'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { useConfirm } from '@/lib/useConfirm'
-import { ErrorList } from '@/components/Alert'
+import { Alert, ErrorList } from '@/components/Alert'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -24,6 +24,7 @@ export function DeviseForm() {
   const [form, setForm] = useState(empty)
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string[]> | undefined>()
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (deviseCode) {
@@ -44,6 +45,7 @@ export function DeviseForm() {
 
   async function save() {
     setSaving(true)
+    setError(null)
     setErrors(undefined)
     const payload = { nom: form.nom, symbole: form.symbole, decimales: Number(form.decimales) }
     try {
@@ -51,7 +53,11 @@ export function DeviseForm() {
       else await api.post('/devises', { ...payload, code: form.code })
       navigate('/references')
     } catch (err) {
-      if (err && typeof err === 'object' && 'errors' in err) setErrors((err as { errors: Record<string, string[]> }).errors)
+      if (err && typeof err === 'object' && 'errors' in err) {
+        setErrors((err as { errors: Record<string, string[]> }).errors)
+      } else {
+        setError(err instanceof Error ? err.message : 'Enregistrement impossible.')
+      }
     } finally {
       setSaving(false)
     }
@@ -65,6 +71,7 @@ export function DeviseForm() {
         <CardHeader><CardTitle>Informations de la devise</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
+            {error && <div className="sm:col-span-2"><Alert variant="error">{error}</Alert></div>}
             {errors && <div className="sm:col-span-2"><ErrorList errors={errors} /></div>}
             <div className="space-y-2">
               <Label>Code</Label>
