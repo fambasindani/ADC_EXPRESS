@@ -50,6 +50,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Délai d'inactivité (minutes)
+    |--------------------------------------------------------------------------
+    |
+    | Nombre de minutes sans requête authentifiée au-delà duquel le jeton
+    | Sanctum est supprimé et la session fermée. Mettre 0 pour désactiver.
+    |
+    */
+
+    'idle_timeout' => (int) env('SESSION_IDLE_MINUTES', 30),
+
+    /*
+    |--------------------------------------------------------------------------
     | Token Prefix
     |--------------------------------------------------------------------------
     |

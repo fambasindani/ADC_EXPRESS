@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, Mail, Lock, Building2, ShieldCheck, Headset, CheckCircle2 } from 'lucide-react'
 import { Logo } from '@/components/Logo'
 import { Footer } from '@/components/Footer'
+import { IDLE_TIMEOUT_MINUTES } from '@/lib/constants'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -26,6 +27,11 @@ export function Login() {
   const [agence, setAgence] = useState(AGENCES[0])
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [sessionExpired] = useState(() => sessionStorage.getItem('adc_session_expired') === '1')
+
+  useEffect(() => {
+    sessionStorage.removeItem('adc_session_expired')
+  }, [])
 
   async function doLogin(em: string, pw: string) {
     setError(null)
@@ -110,6 +116,12 @@ export function Login() {
                 </div>
                 <Logo size={36} />
               </div>
+
+              {sessionExpired && (
+                <Alert variant="info">
+                  Votre session a expiré après {IDLE_TIMEOUT_MINUTES} minutes d'inactivité. Veuillez vous reconnecter.
+                </Alert>
+              )}
 
               {error && <Alert variant="error">{error}</Alert>}
 

@@ -111,3 +111,12 @@ export const PERMISSIONS = [
 ] as const
 
 export const MOMENTS_PAIEMENT = ['DEPOT', 'RETRAIT', 'AUTRE'] as const
+
+/**
+ * Délai d'inactivité avant déconnexion automatique, en minutes.
+ * Modifiable via VITE_IDLE_TIMEOUT_MINUTES (doit rester aligné avec
+ * SESSION_IDLE_MINUTES côté API).
+ */
+const idleFromEnv = Number(import.meta.env.VITE_IDLE_TIMEOUT_MINUTES)
+export const IDLE_TIMEOUT_MINUTES =
+  Number.isFinite(idleFromEnv) && idleFromEnv > 0 ? idleFromEnv : 30

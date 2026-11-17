@@ -51,3 +51,12 @@ Interface disponible sur `http://localhost:5174`.
 - Sécurité : rôles/permissions, codes OTP, journal d'audit.
 - États et rapports PDF (bordereaux, reçus, factures).
 - Listes paginées côté serveur avec recherche sur tous les écrans.
+
+## Sécurité des sessions
+
+La session est fermée automatiquement après une période d'inactivité :
+
+- **Frontend** : délai défini par `IDLE_TIMEOUT_MINUTES` (30 minutes par défaut), surchargeable avec `VITE_IDLE_TIMEOUT_MINUTES`. L'utilisateur est déconnecté et renvoyé vers la page de connexion avec un message explicite.
+- **API** : même contrôle côté serveur via `SESSION_IDLE_MINUTES` (30 minutes par défaut). Passé ce délai, le jeton Sanctum est supprimé et l'API répond `401`.
+
+Les deux valeurs doivent rester alignées (`0` désactive le contrôle côté API).
