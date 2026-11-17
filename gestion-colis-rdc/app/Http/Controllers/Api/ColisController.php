@@ -567,16 +567,24 @@ class ColisController extends Controller
     {
         $user = $request->user();
 
-        $agencesQuery = Agence::where('actif', true);
+        // Toutes les agences actives : utilisées comme destinations possibles.
+        $toutesAgences = Agence::where('actif', true)
+            ->orderBy('nom')
+            ->get(['id', 'code', 'nom', 'type_agence', 'ville_id']);
+
+        // Un agent ne peut déposer que dans son agence ; les admins voient tout.
+        $agencesDepot = $toutesAgences;
         if (! $user->hasRole('SUPER_ADMIN') && ! $user->hasRole('ADMIN') && $user->agence_id) {
-            $agencesQuery->where('id', $user->agence_id);
+            $agencesDepot = $toutesAgences->where('id', $user->agence_id)->values();
         }
 
         return response()->json([
             'success' => true,
             'data'    => [
-                'agences'            => $agencesQuery->orderBy('nom')->get(['id', 'code', 'nom', 'type_agence', 'ville_id']),
-                'villes'             => Ville::where('actif', true)->orderBy('nom')->get(['id', 'nom', 'province_id']),
+                'agences'             => $agencesDepot,
+                'agences_depot'       => $agencesDepot,
+                'agences_destination' => $toutesAgences,
+                'villes'              => Ville::where('actif', true)->orderBy('nom')->get(['id', 'nom', 'province_id']),
                 'types_colis'        => TypeColis::where('actif', true)->orderBy('libelle')->get(['id', 'code', 'libelle', 'fragile']),
                 'services_transport' => ServiceTransport::where('actif', true)->orderBy('libelle')->get(['id', 'code', 'libelle', 'delai_indicatif_jours']),
                 'modes_facturation'  => ['PAYE_AU_DEPOT', 'PAYE_AU_RETRAIT'],

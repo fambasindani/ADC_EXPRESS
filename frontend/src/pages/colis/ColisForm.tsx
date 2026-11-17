@@ -23,6 +23,8 @@ import type { Agence, Colis, Devise, ServiceTransport, TypeColis, Ville } from '
 
 interface ColisOptions {
   agences: Agence[]
+  agences_depot?: Agence[]
+  agences_destination?: Agence[]
   villes: Ville[]
   types_colis: TypeColis[]
   services_transport: ServiceTransport[]
@@ -111,6 +113,12 @@ export function ColisForm() {
           if (!active) return
           setColisInfo(colisRes.data)
           setForm(fromColis(colisRes.data))
+        } else {
+          // Un agent rattaché à une seule agence : on pré-remplit le dépôt.
+          const agencesDepot = res.data.agences_depot ?? res.data.agences ?? []
+          if (agencesDepot.length === 1) {
+            setForm((f) => ({ ...f, agence_depot_id: String(agencesDepot[0].id) }))
+          }
         }
       })
       .catch((err) => {
@@ -125,7 +133,14 @@ export function ColisForm() {
   }, [id])
 
   function update(key: string, value: string) {
-    setForm((f) => ({ ...f, [key]: value }))
+    setForm((f) => {
+      const next = { ...f, [key]: value }
+      // La destination doit rester différente de l'agence de dépôt.
+      if (key === 'agence_depot_id' && next.agence_destination_id === value) {
+        next.agence_destination_id = ''
+      }
+      return next
+    })
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -285,7 +300,7 @@ export function ColisForm() {
                   <SelectValue placeholder="Sélectionner" />
                 </SelectTrigger>
                 <SelectContent>
-                  {(formData?.agences ?? []).map((a) => (
+                  {(formData?.agences_depot ?? formData?.agences ?? []).map((a) => (
                     <SelectItem key={a.id} value={String(a.id)}>
                       {a.nom}
                     </SelectItem>
@@ -300,11 +315,13 @@ export function ColisForm() {
                   <SelectValue placeholder="Sélectionner" />
                 </SelectTrigger>
                 <SelectContent>
-                  {(formData?.agences ?? []).map((a) => (
-                    <SelectItem key={a.id} value={String(a.id)}>
-                      {a.nom}
-                    </SelectItem>
-                  ))}
+                  {(formData?.agences_destination ?? formData?.agences ?? [])
+                    .filter((a) => String(a.id) !== form.agence_depot_id)
+                    .map((a) => (
+                      <SelectItem key={a.id} value={String(a.id)}>
+                        {a.code} — {a.nom}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
