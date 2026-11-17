@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Caisse;
 use App\Models\Colis;
+use App\Models\Devise;
 use App\Models\Facture;
 use App\Models\JournalActivite;
 use App\Models\ModePaiement;
@@ -17,6 +18,24 @@ use Illuminate\Validation\Rule;
 
 class PaiementController extends Controller
 {
+    /**
+     * GET /api/paiements/form-data
+     * Données de référence de l'écran d'encaissement (accessible aux caissiers).
+     */
+    public function formData()
+    {
+        return response()->json([
+            'success' => true,
+            'data'    => [
+                'modes_paiement' => ModePaiement::where('actif', true)
+                    ->orderBy('libelle')
+                    ->get(['id', 'code', 'libelle']),
+                'devises'        => Devise::where('actif', true)->get(['code', 'nom', 'symbole']),
+                'moments'        => ['DEPOT', 'RETRAIT', 'AUTRE'],
+            ],
+        ]);
+    }
+
     /**
      * GET /api/paiements
      *

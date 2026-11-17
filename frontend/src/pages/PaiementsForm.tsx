@@ -68,12 +68,12 @@ export function PaiementsForm() {
   useEffect(() => {
     async function load() {
       try {
-        const [m, d] = await Promise.all([
-          api.get<{ id: number; code: string; libelle: string }[]>('/modes-paiement'),
-          api.get<{ code: string; nom: string }[]>('/devises'),
-        ])
-        setModes(m.data)
-        setDevises(d.data)
+        const ref = await api.get<{
+          modes_paiement: { id: number; code: string; libelle: string }[]
+          devises: { code: string; nom: string }[]
+        }>('/paiements/form-data')
+        setModes(ref.data.modes_paiement)
+        setDevises(ref.data.devises)
 
         // La liste complète des colis n'est utile qu'à la création :
         // en modification, le colis du paiement est chargé directement.
@@ -84,9 +84,11 @@ export function PaiementsForm() {
 
         // Espèces par défaut à la création (mode le plus courant).
         if (!id) {
-          const especes = m.data.find((x) => x.code === 'ESPECES')
+          const especes = ref.data.modes_paiement.find((x) => x.code === 'ESPECES')
           if (especes) setForm((f) => (f.mode_paiement_id ? f : { ...f, mode_paiement_id: String(especes.id) }))
         }
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Impossible de charger les données du paiement.')
       } finally {
         setLoadingColis(false)
       }

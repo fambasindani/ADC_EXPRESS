@@ -245,6 +245,7 @@ Route::delete('/factures/{id}', [FactureController::class, 'destroy'])->middlewa
 
 
 // --- Paiements (routes spécifiques d'abord) ---
+Route::get('/paiements/form-data', [PaiementController::class, 'formData'])->middleware('permission:payments.collect');
 Route::get('/paiements/stats', [PaiementController::class, 'stats'])->middleware('permission:payments.view');
 Route::get('/paiements/par-colis/{colisId}', [PaiementController::class, 'parColis'])->middleware('permission:payments.view');
 Route::get('/paiements/{id}/recu', [PaiementController::class, 'recu'])->middleware('permission:payments.view');
