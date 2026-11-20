@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Web\SuiviPublicController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,3 +17,11 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+/*
+| Suivi public : cible du QR code collé sur le colis. Aucune donnée
+| sensible (téléphone, adresse, montants) n'est exposée.
+*/
+Route::get('/suivi/{numero}', [SuiviPublicController::class, 'show'])
+    ->middleware('throttle:60,1')
+    ->name('suivi.public');

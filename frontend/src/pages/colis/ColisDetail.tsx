@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Package, User, MapPin, Wallet, RefreshCw, History, Pencil } from 'lucide-react'
+import { ArrowLeft, Package, User, MapPin, Wallet, RefreshCw, History, Pencil, Printer } from 'lucide-react'
 import { api } from '@/lib/api'
 import { formatMoney, formatDateTime, formatKg } from '@/lib/format'
 import {
@@ -17,6 +17,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Spinner } from '@/components/ui/spinner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { BordereauDownloadLink } from '@/components/pdf/BordereauPdf'
+import { telechargerEtiquette } from '@/components/pdf/EtiquettePdf'
 import {
   Select,
   SelectContent,
@@ -43,6 +44,7 @@ export function ColisDetail() {
   const [historique, setHistorique] = useState<HistoriqueRow[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [printing, setPrinting] = useState(false)
   const [nouveauStatut, setNouveauStatut] = useState('')
   const [commentaire, setCommentaire] = useState('')
   const [message, setMessage] = useState<string | null>(null)
@@ -60,6 +62,20 @@ export function ColisDetail() {
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [id])
+
+  async function imprimerEtiquette() {
+    if (!id || !colis) return
+    setPrinting(true)
+    setMessage(null)
+    try {
+      const res = await api.get<{ qr_data_url: string; suivi_url: string }>(`/colis/${id}/etiquette`)
+      await telechargerEtiquette(colis, res.data.qr_data_url)
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "Impossible de générer l'étiquette.")
+    } finally {
+      setPrinting(false)
+    }
+  }
 
   async function changerStatut() {
     if (!id || !nouveauStatut) return
@@ -120,9 +136,14 @@ export function ColisDetail() {
           </div>
           <Badge className={STATUT_COLIS_STYLE[colis.statut as StatutColis] ?? ''}>{colis.statut}</Badge>
         </div>
-        <Button variant="outline" onClick={() => navigate(`/colis/${colis.id}/modifier`)}>
-          <Pencil className="h-4 w-4" /> Modifier
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={imprimerEtiquette} disabled={printing}>
+            {printing ? <Spinner /> : <Printer className="h-4 w-4" />} Étiquette
+          </Button>
+          <Button variant="outline" onClick={() => navigate(`/colis/${colis.id}/modifier`)}>
+            <Pencil className="h-4 w-4" /> Modifier
+          </Button>
+        </div>
       </div>
 
       {message && <Alert variant={message.startsWith('Statut') ? 'success' : 'error'}>{message}</Alert>}

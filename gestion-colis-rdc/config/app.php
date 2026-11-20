@@ -57,6 +57,19 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | URL publique (QR codes)
+    |--------------------------------------------------------------------------
+    |
+    | Base des liens encodés dans les QR codes des étiquettes. À renseigner
+    | avec l'adresse joignable depuis un téléphone (ex. http://192.168.1.20:8000).
+    | Si vide, l'hôte de la requête courante est utilisé.
+    |
+    */
+
+    'public_url' => env('PUBLIC_APP_URL'),
+
     'asset_url' => env('ASSET_URL'),
 
     /*

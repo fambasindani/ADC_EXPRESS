@@ -279,6 +279,7 @@ Route::delete('/remboursements/{id}', [RemboursementController::class, 'destroy'
 // --- Colis (routes spécifiques d'abord) ---
 Route::get('/colis/form-data', [ColisController::class, 'formData'])->middleware('permission:colis.create');
 Route::get('/colis/{id}/bordereau', [ColisController::class, 'bordereau'])->middleware('permission:colis.view');
+Route::get('/colis/{id}/etiquette', [ColisController::class, 'etiquette'])->middleware('permission:colis.view');
 Route::get('/colis/{id}/historique', [ColisController::class, 'historique'])->middleware('permission:colis.view');
 Route::post('/colis/{id}/changer-statut', [ColisController::class, 'changerStatut'])->middleware('permission:colis.update');
 Route::post('/colis/{id}/upload-piece', [ColisController::class, 'uploadPiece'])->middleware('permission:colis.update');

@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use App\Support\QrCode;
 
 class ColisController extends Controller
 {
@@ -664,6 +665,38 @@ class ColisController extends Controller
                 'montant_paye' => $colis->montant_paye,
                 'solde'        => $colis->solde,
                 'est_paye'     => $colis->estPaye(),
+            ],
+        ]);
+    }
+
+    /**
+     * GET /api/colis/{id}/etiquette
+     * Données de l'étiquette : QR code (PNG en base64) + URL publique de suivi.
+     */
+    public function etiquette($id, Request $request)
+    {
+        $colis = Colis::findOrFail($id);
+
+        $user = $request->user();
+        if (! $user->hasRole('SUPER_ADMIN') && ! $user->hasRole('ADMIN') && $user->agence_id) {
+            if ($colis->agence_depot_id !== $user->agence_id &&
+                $colis->agence_destination_id !== $user->agence_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Accès refusé à ce colis.',
+                ], 403);
+            }
+        }
+
+        $base      = config('app.public_url') ?: $request->root();
+        $suiviUrl  = rtrim($base, '/') . '/suivi/' . $colis->numero_suivi;
+        $qrDataUrl = 'data:image/png;base64,' . base64_encode(QrCode::png($suiviUrl, 640, 4));
+
+        return response()->json([
+            'success' => true,
+            'data'    => [
+                'qr_data_url' => $qrDataUrl,
+                'suivi_url'   => $suiviUrl,
             ],
         ]);
     }

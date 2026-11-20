@@ -157,7 +157,7 @@ export interface Colis {
   agence_depot?: { id: number; code: string; nom: string } | null
   agence_destination?: { id: number; code: string; nom: string } | null
   ville_destination?: { id: number; nom: string } | null
-  type_colis?: { id: number; code: string; libelle: string } | null
+  type_colis?: { id: number; code: string; libelle: string; fragile?: boolean } | null
   service?: { id: number; code: string; libelle: string } | null
   createur?: { id: number; nom: string; prenom: string } | null
   montant_paye?: number

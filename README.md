@@ -60,3 +60,27 @@ La session est fermée automatiquement après une période d'inactivité :
 - **API** : même contrôle côté serveur via `SESSION_IDLE_MINUTES` (30 minutes par défaut). Passé ce délai, le jeton Sanctum est supprimé et l'API répond `401`.
 
 Les deux valeurs doivent rester alignées (`0` désactive le contrôle côté API).
+
+## Étiquette colis & suivi public
+
+Chaque colis dispose d'une **étiquette imprimable (PDF, 100 × 150 mm)** générée côté client avec `@react-pdf/renderer` (bouton « Étiquette » sur la fiche du colis). L'étiquette contient le numéro de suivi, le trajet, le destinataire, le poids, le type et la mention « fragile » le cas échéant, ainsi qu'un **QR code**.
+
+Le QR encode l'URL publique `PUBLIC_APP_URL/suivi/{numero_suivi}` :
+
+- **Scan avec un téléphone** → la page Blade `resources/views/colis/suivi.blade.php` affiche le détail du colis (statut, progression, agences, dates, historique), sans aucune donnée sensible (téléphone, adresse, montants).
+- Le QR est produit côté serveur (`app/Support/QrCode.php`, via `bacon/bacon-qr-code` + GD) et renvoyé en base64 par `GET /api/colis/{id}/etiquette`.
+
+### Accès depuis un téléphone
+
+Le QR doit pointer vers une adresse joignable depuis le téléphone :
+
+```env
+# gestion-colis-rdc/.env
+PUBLIC_APP_URL=http://192.168.1.20:8000
+```
+
+Sans cette variable, l'hôte de la requête courante est utilisé (suffisant sur la même machine). Pour écouter sur le réseau local :
+
+```bash
+php artisan serve --host=0.0.0.0 --port=8000
+```
