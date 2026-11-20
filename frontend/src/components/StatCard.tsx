@@ -20,7 +20,7 @@ const accentStyles: Record<NonNullable<StatCardProps['accent']>, string> = {
 
 export function StatCard({ title, value, icon: Icon, hint, accent = 'red' }: StatCardProps) {
   return (
-    <Card>
+    <Card className="transition-shadow hover:shadow-card-hover">
       <CardContent className="flex items-center gap-4 p-5">
         <div className={cn('flex h-12 w-12 shrink-0 items-center justify-center rounded-xl', accentStyles[accent])}>
           <Icon className="h-6 w-6" />
