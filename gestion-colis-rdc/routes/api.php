@@ -90,6 +90,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me',      [AuthController::class, 'me']);
 
+    // WhatsApp (envoi automatique / click-to-chat)
+    Route::post('/whatsapp/envoyer', [ParametreController::class, 'envoyer']);
+
     // OTP (sécurisation retrait / livraison / suivi)
     Route::post('/otp/generer',   [OtpCodeController::class, 'generer'])->middleware('permission:colis.update');
     Route::post('/otp/verifier',  [OtpCodeController::class, 'verifier'])->middleware('permission:colis.update');

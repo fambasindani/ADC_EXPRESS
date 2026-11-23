@@ -49,7 +49,7 @@ export function ColisDetail() {
   const [printing, setPrinting] = useState(false)
   const [nouveauStatut, setNouveauStatut] = useState('')
   const [commentaire, setCommentaire] = useState('')
-  const [message, setMessage] = useState<string | null>(null)
+  const [message, setMessage] = useState<{ text: string; variant: 'success' | 'error' } | null>(null)
 
   useEffect(() => {
     if (!id) return
@@ -73,18 +73,27 @@ export function ColisDetail() {
       const res = await api.get<{ qr_data_url: string; suivi_url: string }>(`/colis/${id}/etiquette`)
       await telechargerEtiquette(colis, res.data.qr_data_url)
     } catch (e) {
-      setMessage(e instanceof Error ? e.message : "Impossible de générer l'étiquette.")
+      setMessage({ text: e instanceof Error ? e.message : "Impossible de générer l'étiquette.", variant: 'error' })
     } finally {
       setPrinting(false)
     }
   }
 
-  function envoyerWhatsapp() {
+  async function envoyerWhatsapp() {
     if (!colis) return
     const suivi = wa.suivi_base ? `${wa.suivi_base}/suivi/${colis.numero_suivi}` : null
-    const message = `ADC EXPRESS — Votre colis ${colis.numero_suivi} est « ${colis.statut} ».`
+    const texte = `ADC EXPRESS — Votre colis ${colis.numero_suivi} est « ${colis.statut} ».`
       + (suivi ? `\nSuivi : ${suivi}` : '')
-    window.open(whatsappLien(colis.telephone_destinataire, message, wa.numero), '_blank', 'noopener')
+
+    setMessage(null)
+    try {
+      await api.post('/whatsapp/envoyer', { destinataire: colis.telephone_destinataire, message: texte })
+      setMessage({ text: `Message WhatsApp envoyé au destinataire (${colis.telephone_destinataire}).`, variant: 'success' })
+    } catch {
+      // Envoi automatique non configuré → repli click-to-chat.
+      window.open(whatsappLien(colis.telephone_destinataire, texte, wa.numero), '_blank', 'noopener')
+      setMessage({ text: 'WhatsApp Cloud API non configurée : WhatsApp s\'ouvre, appuyez sur « Envoyer ».', variant: 'error' })
+    }
   }
 
   async function changerStatut() {
@@ -101,9 +110,9 @@ export function ColisDetail() {
       setHistorique(h.data)
       setNouveauStatut('')
       setCommentaire('')
-      setMessage('Statut mis à jour avec succès.')
+      setMessage({ text: 'Statut mis à jour avec succès.', variant: 'success' })
     } catch (e) {
-      setMessage(e instanceof Error ? e.message : 'Erreur.')
+      setMessage({ text: e instanceof Error ? e.message : 'Erreur.', variant: 'error' })
     } finally {
       setSaving(false)
     }
@@ -159,7 +168,7 @@ export function ColisDetail() {
         </div>
       </div>
 
-      {message && <Alert variant={message.startsWith('Statut') ? 'success' : 'error'}>{message}</Alert>}
+      {message && <Alert variant={message.variant}>{message.text}</Alert>}
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>

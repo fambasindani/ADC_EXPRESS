@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Colis;
 use App\Models\OtpCode;
+use App\Support\WhatsApp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -46,8 +47,13 @@ class OtpCodeController extends Controller
             'utilise'   => false,
         ]);
 
-        // TODO: envoyer le code par SMS/WhatsApp via le gateway.
-        // En attendant, on le renvoie dans la réponse (mode développement).
+        // Envoi automatique du code par WhatsApp (Cloud API) si configuré ;
+        // sinon le code reste affiché dans la réponse (mode développement).
+        $whatsapp = WhatsApp::envoyer(
+            $request->telephone,
+            "Votre code de sécurité ADC EXPRESS : {$code}. Valable 10 minutes."
+        );
+
         return response()->json([
             'success' => true,
             'message' => 'Code OTP généré.',
@@ -57,6 +63,7 @@ class OtpCodeController extends Controller
                 'usage_otp' => $otp->usage_otp,
                 'expire_at' => $otp->expire_at,
                 'code'      => $code,
+                'whatsapp'  => $whatsapp,
             ],
         ], 201);
     }

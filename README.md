@@ -87,8 +87,16 @@ php artisan serve --host=0.0.0.0 --port=8000
 
 ## Messages WhatsApp
 
-L'envoi de messages WhatsApp se fait en **click-to-chat** (sans gateway) : un bouton ouvre `wa.me/<destinataire>` avec un message pré-rempli.
+L'envoi de messages WhatsApp dispose de **deux modes** :
+
+1. **Envoi automatique** (recommandé) via la **WhatsApp Business Cloud API** (Meta) : le message part tout seul, sans intervention manuelle.
+   ```env
+   # gestion-colis-rdc/.env — obtenus sur developers.facebook.com > WhatsApp
+   WHATSAPP_TOKEN=
+   WHATSAPP_PHONE_NUMBER_ID=
+   ```
+2. **Click-to-chat** (repli) : si les clés ci-dessus sont absentes, le bouton ouvre `wa.me/<destinataire>` avec le message pré-rempli (l'agent clique « Envoyer »).
 
 - Numéro émetteur configurable via le paramètre `whatsapp_numero` (page **Paramètres Globaux**), valeur par défaut `+243898596501`.
-- Boutons « WhatsApp » sur la **fiche du colis** (prévenir le destinataire avec le lien de suivi) et sur la page **Codes OTP** (envoyer le code).
+- Boutons « WhatsApp » sur la **fiche du colis** (prévenir le destinataire avec le lien de suivi) et sur la page **Codes OTP** (le code est envoyé automatiquement à la génération).
 - Les numéros locaux (ex. `089…`) sont convertis automatiquement en format international `243…`.

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use App\Models\Parametre;
 use App\Support\WhatsApp;
 use Illuminate\Http\Request;
@@ -38,6 +39,50 @@ class ParametreController extends Controller
                 'numero'     => WhatsApp::numero(),
                 'suivi_base' => rtrim((string) (config('app.public_url') ?: $request->root()), '/'),
             ],
+        ]);
+    }
+
+    /**
+     * POST /api/whatsapp/envoyer
+     * Envoie automatiquement un message WhatsApp (Cloud API) ; sinon renvoie
+     * un lien click-to-chat de repli.
+     */
+    public function envoyer(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'destinataire' => 'required|string|max:30',
+            'message'      => 'required|string|max:1000',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        $resultat = WhatsApp::envoyer($request->destinataire, $request->message);
+
+        if (! $resultat['envoye']) {
+            return response()->json([
+                'success' => false,
+                'message' => $resultat['erreur'] ?? 'Envoi impossible.',
+                'data'    => [
+                    'lien_fallback' => WhatsApp::lien($request->destinataire, $request->message),
+                ],
+            ], 422);
+        }
+
+        Notification::creer(
+            $request->user()->id,
+            null,
+            'WHATSAPP',
+            $request->message,
+            'Message WhatsApp',
+            $request->destinataire
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Message WhatsApp envoyé.',
+            'data'    => $resultat,
         ]);
     }
 
