@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus } from 'lucide-react'
+import { Plus, Send, PackageCheck } from 'lucide-react'
 import { api } from '@/lib/api'
 import { useList } from '@/lib/useList'
 import { DataTable, type Column } from '@/components/DataTable'
 import { PageHeader } from '@/components/PageHeader'
 import { RowActions } from '@/components/RowActions'
 import { SearchInput } from '@/components/SearchInput'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { useConfirm } from '@/lib/useConfirm'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatDateTime } from '@/lib/format'
@@ -23,6 +25,7 @@ interface TransfertRow {
 
 export function Transferts() {
   const [search, setSearch] = useState('')
+  const { confirm, dialog } = useConfirm()
   const { items, meta, loading, refresh, setPage } = useList<TransfertRow>('/transferts', { search }, [search])
 
   async function del(id: number) {
@@ -34,6 +37,38 @@ export function Transferts() {
     }
   }
 
+  async function expedier(id: number) {
+    try {
+      await api.post(`/transferts/${id}/expedier`)
+      refresh()
+    } catch (e) {
+      window.alert(e instanceof Error ? e.message : 'Erreur.')
+    }
+  }
+
+  async function recevoir(id: number) {
+    try {
+      await api.post(`/transferts/${id}/recevoir`)
+      refresh()
+    } catch (e) {
+      window.alert(e instanceof Error ? e.message : 'Erreur.')
+    }
+  }
+
+  function demanderExpedier(id: number) {
+    confirm(
+      { title: 'Expédier ce transfert ?', description: 'Le colis passera en transit vers l\'agence d\'arrivée.', confirmLabel: 'Expédier' },
+      () => expedier(id),
+    )
+  }
+
+  function demanderRecevoir(id: number) {
+    confirm(
+      { title: 'Réceptionner ce transfert ?', description: 'Le colis sera marqué comme arrivé en agence.', confirmLabel: 'Recevoir' },
+      () => recevoir(id),
+    )
+  }
+
   const columns: Column<TransfertRow>[] = [
     { key: 'colis', header: 'Colis', className: 'font-mono text-xs', render: (r) => r.colis?.numero_suivi ?? '—' },
     { key: 'depart', header: 'Départ', render: (r) => r.agence_depart?.nom ?? '—' },
@@ -41,7 +76,26 @@ export function Transferts() {
     { key: 'statut', header: 'Statut', render: (r) => <Badge variant="outline">{r.statut}</Badge> },
     { key: 'date_transfert', header: 'Transféré le', render: (r) => formatDateTime(r.date_transfert) },
     { key: 'date_reception', header: 'Reçu le', render: (r) => formatDateTime(r.date_reception) },
-    { key: 'actions', header: 'Actions', className: 'text-right', render: (r) => <RowActions viewTo={r.colis ? `/colis/${r.colis.id}` : undefined} editTo={`/transferts/${r.id}`} onDelete={() => del(r.id)} /> },
+    {
+      key: 'actions',
+      header: 'Actions',
+      className: 'text-right',
+      render: (r) => (
+        <div className="flex items-center justify-end gap-1">
+          {r.statut === 'EN_ATTENTE' && (
+            <Button variant="ghost" size="icon" title="Expédier" onClick={() => demanderExpedier(r.id)}>
+              <Send className="h-4 w-4 text-brand-cyan" />
+            </Button>
+          )}
+          {r.statut === 'EXPEDIE' && (
+            <Button variant="ghost" size="icon" title="Recevoir" onClick={() => demanderRecevoir(r.id)}>
+              <PackageCheck className="h-4 w-4 text-emerald-600" />
+            </Button>
+          )}
+          <RowActions viewTo={r.colis ? `/colis/${r.colis.id}` : undefined} editTo={`/transferts/${r.id}`} onDelete={() => del(r.id)} />
+        </div>
+      ),
+    },
   ]
 
   return (
@@ -78,6 +132,8 @@ export function Transferts() {
           emptyDescription={search ? 'Aucun transfert ne correspond à votre recherche.' : undefined}
         />
       </div>
+
+      <ConfirmDialog {...dialog} />
     </div>
   )
 }
