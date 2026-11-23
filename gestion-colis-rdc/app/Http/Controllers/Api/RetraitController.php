@@ -109,9 +109,22 @@ class RetraitController extends Controller
                     throw new \Exception('Code OTP invalide ou expiré. Retrait impossible.');
                 }
 
+                // 🔒 Le retrait se fait à l'agence de DESTINATION du colis.
+                $agenceRetrait = $colis->agence_destination_id ?? $user->agence_id;
+
+                // Un agent non administrateur ne peut retirer que les colis
+                // destinés à sa propre agence.
+                if (! $user->hasRole('SUPER_ADMIN') && ! $user->hasRole('ADMIN') && $user->agence_id) {
+                    if ((int) $agenceRetrait !== (int) $user->agence_id) {
+                        throw new \Exception(
+                            "Ce colis doit être retiré à son agence de destination ({$colis->agenceDestination?->nom})."
+                        );
+                    }
+                }
+
                 $retrait = Retrait::create([
                     'colis_id'              => $colis->id,
-                    'agence_id'             => $user->agence_id ?? $colis->agence_destination_id,
+                    'agence_id'             => $agenceRetrait,
                     'retire_par_nom'        => $request->retire_par_nom,
                     'retire_par_telephone'  => $request->retire_par_telephone,
                     'type_identite'         => $request->type_identite,
