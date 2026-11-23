@@ -126,7 +126,7 @@ export function ExpeditionsForm() {
     try {
       if (isEdit) await api.put(`/expeditions/${id}`, payload)
       else await api.post('/expeditions', payload)
-      navigate('/expeditions')
+      navigate(isEdit ? `/expeditions/${id}` : '/expeditions')
     } catch (err) {
       if (err && typeof err === 'object' && 'errors' in err) {
         setErrors((err as { errors: Record<string, string[]> }).errors)
@@ -140,7 +140,7 @@ export function ExpeditionsForm() {
 
   return (
     <div className="page-container">
-      <PageHeader title={isEdit ? "Modifier l'expédition" : 'Nouvelle expédition'} actions={<BackButton to="/expeditions" />} />
+      <PageHeader title={isEdit ? "Modifier l'expédition" : 'Nouvelle expédition'} actions={<BackButton to={isEdit ? `/expeditions/${id}` : '/expeditions'} />} />
 
       <Card>
         <CardHeader><CardTitle>Informations de l'expédition</CardTitle></CardHeader>

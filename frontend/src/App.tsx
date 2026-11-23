@@ -25,6 +25,7 @@ import { DeviseForm } from '@/pages/DeviseForm'
 import { ModePaiementForm } from '@/pages/ModePaiementForm'
 import { Expeditions } from '@/pages/Expeditions'
 import { ExpeditionsForm } from '@/pages/ExpeditionsForm'
+import { ExpeditionsDetail } from '@/pages/ExpeditionsDetail'
 import { Transferts } from '@/pages/Transferts'
 import { TransfertsForm } from '@/pages/TransfertsForm'
 import { Paiements } from '@/pages/Paiements'
@@ -93,7 +94,8 @@ const router = createBrowserRouter([
       { path: 'references/modes/:id', element: <ModePaiementForm /> },
       { path: 'expeditions', element: <Expeditions /> },
       { path: 'expeditions/nouveau', element: <ExpeditionsForm /> },
-      { path: 'expeditions/:id', element: <ExpeditionsForm /> },
+      { path: 'expeditions/:id/modifier', element: <ExpeditionsForm /> },
+      { path: 'expeditions/:id', element: <ExpeditionsDetail /> },
       { path: 'transferts', element: <Transferts /> },
       { path: 'transferts/nouveau', element: <TransfertsForm /> },
       { path: 'transferts/:id', element: <TransfertsForm /> },

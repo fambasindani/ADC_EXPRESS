@@ -44,7 +44,7 @@ export function Expeditions() {
     { key: 'statut', header: 'Statut', render: (r) => <Badge className={STATUT_EXPEDITION_STYLE[r.statut] ?? ''}>{r.statut}</Badge> },
     { key: 'date_depart', header: 'Départ le', render: (r) => formatDateTime(r.date_depart) },
     { key: 'date_arrivee_prevue', header: 'Arrivée prévue', render: (r) => formatDateTime(r.date_arrivee_prevue) },
-    { key: 'actions', header: 'Actions', className: 'text-right', render: (r) => <RowActions editTo={`/expeditions/${r.id}`} onDelete={() => del(r.id)} /> },
+    { key: 'actions', header: 'Actions', className: 'text-right', render: (r) => <RowActions viewTo={`/expeditions/${r.id}`} editTo={`/expeditions/${r.id}/modifier`} onDelete={() => del(r.id)} /> },
   ]
 
   return (
