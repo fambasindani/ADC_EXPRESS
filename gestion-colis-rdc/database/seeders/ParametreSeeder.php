@@ -15,6 +15,7 @@ class ParametreSeeder extends Seeder
             ['cle' => 'paiement_depot_active', 'valeur' => '1', 'description' => 'Autoriser paiement au depot'],
             ['cle' => 'paiement_retrait_active', 'valeur' => '1', 'description' => 'Autoriser paiement au retrait'],
             ['cle' => 'suivi_public_actif', 'valeur' => '1', 'description' => 'Suivi public par numero'],
+            ['cle' => 'whatsapp_numero', 'valeur' => '+243898596501', 'description' => "Numero WhatsApp d'envoi des messages (compte emetteur)"],
         ]);
     }
 }

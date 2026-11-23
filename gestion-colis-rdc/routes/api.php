@@ -81,6 +81,9 @@ Route::post('/login', [AuthController::class, 'login']);
 // Suivi public d'un colis par numéro de suivi
 Route::get('/suivi/{numero}', [TrackingController::class, 'suivre']);
 
+// Infos WhatsApp (numéro d'envoi + base du lien de suivi)
+Route::get('/whatsapp/numero', [ParametreController::class, 'whatsappNumero']);
+
 // Routes protégées
 Route::middleware('auth:sanctum')->group(function () {
 

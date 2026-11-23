@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Package, User, MapPin, Wallet, RefreshCw, History, Pencil, Printer } from 'lucide-react'
+import { ArrowLeft, Package, User, MapPin, Wallet, RefreshCw, History, Pencil, Printer, MessageCircle } from 'lucide-react'
 import { api } from '@/lib/api'
 import { formatMoney, formatDateTime, formatKg } from '@/lib/format'
 import {
@@ -18,6 +18,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { BordereauDownloadLink } from '@/components/pdf/BordereauPdf'
 import { telechargerEtiquette } from '@/components/pdf/EtiquettePdf'
+import { whatsappLien, useWhatsappInfos } from '@/lib/whatsapp'
 import {
   Select,
   SelectContent,
@@ -40,6 +41,7 @@ interface HistoriqueRow {
 export function ColisDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const wa = useWhatsappInfos()
   const [colis, setColis] = useState<Colis | null>(null)
   const [historique, setHistorique] = useState<HistoriqueRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -75,6 +77,14 @@ export function ColisDetail() {
     } finally {
       setPrinting(false)
     }
+  }
+
+  function envoyerWhatsapp() {
+    if (!colis) return
+    const suivi = wa.suivi_base ? `${wa.suivi_base}/suivi/${colis.numero_suivi}` : null
+    const message = `ADC EXPRESS — Votre colis ${colis.numero_suivi} est « ${colis.statut} ».`
+      + (suivi ? `\nSuivi : ${suivi}` : '')
+    window.open(whatsappLien(colis.telephone_destinataire, message, wa.numero), '_blank', 'noopener')
   }
 
   async function changerStatut() {
@@ -137,6 +147,9 @@ export function ColisDetail() {
           <Badge className={STATUT_COLIS_STYLE[colis.statut as StatutColis] ?? ''}>{colis.statut}</Badge>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={envoyerWhatsapp} title={`Envoyer un message WhatsApp au destinataire (${wa.numero})`}>
+            <MessageCircle className="h-4 w-4 text-emerald-600" /> WhatsApp
+          </Button>
           <Button variant="outline" onClick={imprimerEtiquette} disabled={printing}>
             {printing ? <Spinner /> : <Printer className="h-4 w-4" />} Étiquette
           </Button>

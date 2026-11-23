@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Copy, KeyRound, ShieldCheck } from 'lucide-react'
+import { Copy, KeyRound, ShieldCheck, MessageCircle } from 'lucide-react'
 import { api } from '@/lib/api'
 import { fetchAllPages } from '@/lib/fetchAll'
 import { formatMoney } from '@/lib/format'
+import { whatsappLien, useWhatsappInfos } from '@/lib/whatsapp'
 import { STATUT_COLIS_STYLE, type StatutColis } from '@/lib/constants'
 import { PageHeader } from '@/components/PageHeader'
 import { Alert } from '@/components/Alert'
@@ -37,6 +38,7 @@ interface OtpGenere {
 }
 
 export function Otp() {
+  const wa = useWhatsappInfos()
   const [colisList, setColisList] = useState<Colis[]>([])
   const [loadingColis, setLoadingColis] = useState(true)
 
@@ -137,6 +139,16 @@ export function Otp() {
       setVariant('error')
       setMessage('Copie impossible : notez le code manuellement.')
     }
+  }
+
+  function envoyerWhatsapp() {
+    if (!otp) return
+    const lien = whatsappLien(
+      otp.telephone,
+      `Votre code de sécurité ADC EXPRESS : ${otp.code}. Valable 10 minutes.`,
+      wa.numero,
+    )
+    window.open(lien, '_blank', 'noopener')
   }
 
   return (
@@ -256,6 +268,9 @@ export function Otp() {
                 <div className="mt-3 flex flex-wrap justify-center gap-2">
                   <Button type="button" variant="outline" size="sm" onClick={copier}>
                     <Copy className="h-4 w-4" /> Copier
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" onClick={envoyerWhatsapp}>
+                    <MessageCircle className="h-4 w-4 text-emerald-600" /> WhatsApp
                   </Button>
                   <Button
                     type="button"

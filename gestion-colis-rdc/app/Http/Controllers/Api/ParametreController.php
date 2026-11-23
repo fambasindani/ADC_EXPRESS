@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Parametre;
+use App\Support\WhatsApp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -21,6 +22,22 @@ class ParametreController extends Controller
         return response()->json([
             'success' => true,
             'data'    => $query->orderBy('cle')->get(),
+        ]);
+    }
+
+    /**
+     * GET /api/whatsapp/numero
+     * Numéro WhatsApp d'envoi + base de l'URL publique de suivi.
+     * Public (aucune donnée sensible).
+     */
+    public function whatsappNumero(Request $request)
+    {
+        return response()->json([
+            'success' => true,
+            'data'    => [
+                'numero'     => WhatsApp::numero(),
+                'suivi_base' => rtrim((string) (config('app.public_url') ?: $request->root()), '/'),
+            ],
         ]);
     }
 
