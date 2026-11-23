@@ -28,9 +28,30 @@ interface ExpeditionData {
   mode_transport: string
   transporteur: string | null
   statut: string
+  date_depart: string | null
+  date_arrivee_prevue: string | null
 }
 
-const empty = { agence_depart_id: '', agence_arrivee_id: '', mode_transport: 'ROUTE', transporteur: '' }
+const empty = {
+  agence_depart_id: '',
+  agence_arrivee_id: '',
+  mode_transport: 'ROUTE',
+  transporteur: '',
+  date_depart: '',
+  date_arrivee_prevue: '',
+}
+
+/** ISO "2026-11-13T08:00:00.000000Z" → "2026-11-13T08:00" pour un <input type="datetime-local">. */
+function toLocalInput(valeur: string | null | undefined): string {
+  if (!valeur) return ''
+  return valeur.slice(0, 16)
+}
+
+/** "2026-11-13T08:00" → "2026-11-13 08:00:00" pour la base. */
+function toDbDate(valeur: string): string | null {
+  if (!valeur) return null
+  return valeur.replace('T', ' ') + ':00'
+}
 
 export function ExpeditionsForm() {
   const navigate = useNavigate()
@@ -62,6 +83,8 @@ export function ExpeditionsForm() {
             agence_arrivee_id: String(e.agence_arrivee_id),
             mode_transport: e.mode_transport,
             transporteur: e.transporteur ?? '',
+            date_depart: toLocalInput(e.date_depart),
+            date_arrivee_prevue: toLocalInput(e.date_arrivee_prevue),
           })
         }
       })
@@ -97,6 +120,8 @@ export function ExpeditionsForm() {
       agence_arrivee_id: Number(form.agence_arrivee_id),
       mode_transport: form.mode_transport,
       transporteur: form.transporteur || null,
+      date_depart: toDbDate(form.date_depart),
+      date_arrivee_prevue: toDbDate(form.date_arrivee_prevue),
     }
     try {
       if (isEdit) await api.put(`/expeditions/${id}`, payload)
@@ -157,6 +182,14 @@ export function ExpeditionsForm() {
               </Select>
             </div>
             <div className="space-y-2"><Label>Transporteur</Label><Input value={form.transporteur} onChange={(e) => setForm((f) => ({ ...f, transporteur: e.target.value }))} disabled={bloque} /></div>
+            <div className="space-y-2">
+              <Label>Départ prévu</Label>
+              <Input type="datetime-local" value={form.date_depart} onChange={(e) => setForm((f) => ({ ...f, date_depart: e.target.value }))} disabled={bloque} />
+            </div>
+            <div className="space-y-2">
+              <Label>Arrivée prévue</Label>
+              <Input type="datetime-local" value={form.date_arrivee_prevue} onChange={(e) => setForm((f) => ({ ...f, date_arrivee_prevue: e.target.value }))} disabled={bloque} />
+            </div>
             <div className="flex justify-end gap-2 sm:col-span-2">
               <Button type="submit" disabled={saving || bloque}>{saving && <Spinner />}<Save className="h-4 w-4" /> Enregistrer</Button>
             </div>

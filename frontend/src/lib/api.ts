@@ -56,11 +56,23 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   }
 
   if (res.status === 401) {
+    // La requête de connexion doit renvoyer le message précis de l'API
+    // (email introuvable, mot de passe incorrect...) plutôt que le message
+    // générique de session expirée.
+    const isLoginRequest = path === '/login'
+
     localStorage.removeItem('adc_token')
     localStorage.removeItem('adc_user')
-    if (!window.location.pathname.startsWith('/login')) {
+
+    if (!isLoginRequest && !window.location.pathname.startsWith('/login')) {
       window.location.href = '/login'
     }
+
+    if (isLoginRequest) {
+      const data = (body ?? {}) as { message?: string }
+      throw new ApiError(data.message ?? 'Identifiants incorrects.', 401)
+    }
+
     throw new ApiError('Session expirée. Veuillez vous reconnecter.', 401)
   }
 

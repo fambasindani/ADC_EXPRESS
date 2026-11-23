@@ -20,6 +20,7 @@ interface ExpeditionRow {
   mode_transport: string
   statut: string
   date_depart: string | null
+  date_arrivee_prevue: string | null
 }
 
 export function Expeditions() {
@@ -42,6 +43,7 @@ export function Expeditions() {
     { key: 'mode_transport', header: 'Mode', render: (r) => r.mode_transport },
     { key: 'statut', header: 'Statut', render: (r) => <Badge className={STATUT_EXPEDITION_STYLE[r.statut] ?? ''}>{r.statut}</Badge> },
     { key: 'date_depart', header: 'Départ le', render: (r) => formatDateTime(r.date_depart) },
+    { key: 'date_arrivee_prevue', header: 'Arrivée prévue', render: (r) => formatDateTime(r.date_arrivee_prevue) },
     { key: 'actions', header: 'Actions', className: 'text-right', render: (r) => <RowActions editTo={`/expeditions/${r.id}`} onDelete={() => del(r.id)} /> },
   ]
 

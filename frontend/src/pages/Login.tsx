@@ -136,7 +136,10 @@ export function Login() {
                       placeholder="agent@adcexpress.cd"
                       className="pl-9"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => {
+                        setEmail(e.target.value)
+                        setError(null)
+                      }}
                       autoComplete="email"
                     />
                   </div>
@@ -157,7 +160,10 @@ export function Login() {
                       placeholder="••••••••"
                       className="pl-9 pr-10"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => {
+                        setPassword(e.target.value)
+                        setError(null)
+                      }}
                       autoComplete="current-password"
                     />
                     <button

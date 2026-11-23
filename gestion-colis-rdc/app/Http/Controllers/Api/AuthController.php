@@ -16,25 +16,48 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'email'    => 'required|email',
             'password' => 'required|string|min:4',
+        ], [
+            'email.required'    => "L'adresse email est requise.",
+            'email.email'       => 'Veuillez saisir une adresse email valide.',
+            'password.required' => 'Le mot de passe est requis.',
+            'password.min'      => 'Le mot de passe doit contenir au moins 4 caractères.',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first(),
+                'errors'  => $validator->errors(),
+            ], 422);
         }
 
         $user = User::where('email', $request->email)->first();
 
-        if (! $user || ! Hash::check($request->password, $user->password_hash)) {
+        if (! $user) {
             return response()->json([
                 'success' => false,
-                'message' => 'Identifiants incorrects.',
+                'message' => 'Adresse email introuvable. Vérifiez votre email.',
             ], 401);
+        }
+
+        if (! Hash::check($request->password, $user->password_hash)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Mot de passe incorrect.',
+            ], 401);
+        }
+
+        if ($user->statut === 'BLOQUE') {
+            return response()->json([
+                'success' => false,
+                'message' => "Votre compte est bloqué. Contactez l'administrateur.",
+            ], 403);
         }
 
         if ($user->statut !== 'ACTIF') {
             return response()->json([
                 'success' => false,
-                'message' => 'Compte inactif ou bloqué.',
+                'message' => "Votre compte est désactivé. Contactez l'administrateur.",
             ], 403);
         }
 
