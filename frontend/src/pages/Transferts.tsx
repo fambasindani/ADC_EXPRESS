@@ -8,7 +8,9 @@ import { PageHeader } from '@/components/PageHeader'
 import { RowActions } from '@/components/RowActions'
 import { SearchInput } from '@/components/SearchInput'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { MessageDialog } from '@/components/MessageDialog'
 import { useConfirm } from '@/lib/useConfirm'
+import { useMessage } from '@/lib/useMessage'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatDateTime } from '@/lib/format'
@@ -26,6 +28,7 @@ interface TransfertRow {
 export function Transferts() {
   const [search, setSearch] = useState('')
   const { confirm, dialog } = useConfirm()
+  const { show, dialog: messageDialog } = useMessage()
   const { items, meta, loading, refresh, setPage } = useList<TransfertRow>('/transferts', { search }, [search])
 
   async function del(id: number) {
@@ -33,7 +36,7 @@ export function Transferts() {
       await api.delete(`/transferts/${id}`)
       refresh()
     } catch (e) {
-      window.alert(e instanceof Error ? e.message : 'Erreur.')
+      show(e instanceof Error ? e.message : 'Erreur.', { title: 'Suppression impossible' })
     }
   }
 
@@ -42,7 +45,7 @@ export function Transferts() {
       await api.post(`/transferts/${id}/expedier`)
       refresh()
     } catch (e) {
-      window.alert(e instanceof Error ? e.message : 'Erreur.')
+      show(e instanceof Error ? e.message : 'Erreur.', { title: 'Expédition impossible' })
     }
   }
 
@@ -51,7 +54,7 @@ export function Transferts() {
       await api.post(`/transferts/${id}/recevoir`)
       refresh()
     } catch (e) {
-      window.alert(e instanceof Error ? e.message : 'Erreur.')
+      show(e instanceof Error ? e.message : 'Erreur.', { title: 'Réception impossible' })
     }
   }
 
@@ -134,6 +137,7 @@ export function Transferts() {
       </div>
 
       <ConfirmDialog {...dialog} />
+      <MessageDialog {...messageDialog} />
     </div>
   )
 }
