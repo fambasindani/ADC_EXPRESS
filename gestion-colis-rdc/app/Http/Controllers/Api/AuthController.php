@@ -98,6 +98,47 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * POST /api/me/mot-de-passe
+     * Change le mot de passe de l'utilisateur connecté.
+     */
+    public function changePassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required|string',
+            'password'         => 'required|string|min:6|confirmed',
+        ], [
+            'current_password.required' => 'Le mot de passe actuel est requis.',
+            'password.required'         => 'Le nouveau mot de passe est requis.',
+            'password.min'              => 'Le nouveau mot de passe doit contenir au moins 6 caractères.',
+            'password.confirmed'        => 'La confirmation du mot de passe ne correspond pas.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first(),
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        $user = $request->user();
+
+        if (! Hash::check($request->current_password, $user->password_hash)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Le mot de passe actuel est incorrect.',
+            ], 422);
+        }
+
+        $user->update(['password_hash' => Hash::make($request->password)]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Mot de passe modifié avec succès.',
+        ]);
+    }
+
     private function serializeUser(User $user): array
     {
         $user->load('agence', 'roles.permissions');

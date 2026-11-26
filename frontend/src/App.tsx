@@ -5,6 +5,7 @@ import { AppLayout } from '@/layouts/AppLayout'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { Login } from '@/pages/Login'
 import { Dashboard } from '@/pages/Dashboard'
+import { Profil } from '@/pages/Profil'
 import { ColisList } from '@/pages/colis/ColisList'
 import { ColisForm } from '@/pages/colis/ColisForm'
 import { ColisDetail } from '@/pages/colis/ColisDetail'
@@ -63,6 +64,7 @@ const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Dashboard /> },
+      { path: 'profil', element: <Profil /> },
       { path: 'colis', element: <ColisList /> },
       { path: 'colis/nouveau', element: <ColisForm /> },
       { path: 'colis/:id/modifier', element: <ColisForm /> },

@@ -1,4 +1,4 @@
-import { Menu, LogOut, User as UserIcon } from 'lucide-react'
+import { Menu, LogOut, User as UserIcon, UserCog } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -57,6 +57,10 @@ export function Header({ onOpenSidebar }: HeaderProps) {
               {user?.roles?.map((r) => r.nom).join(', ')}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => navigate('/profil')}>
+              <UserCog className="h-4 w-4" />
+              Profil
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600">
               <LogOut className="h-4 w-4" />
               Déconnexion
