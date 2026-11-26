@@ -179,9 +179,11 @@ class ColisController extends Controller
                 }
 
                 // 🔹 Statut initial selon le mode de facturation
+                //   PAYE_AU_DEPOT  : paiement exigé au dépôt → colis en attente de paiement
+                //   PAYE_AU_RETRAIT: paiement à la remise  → colis prêt à expédier immédiatement
                 $statutInitial = $request->mode_facturation === 'PAYE_AU_DEPOT'
-                    ? 'PRET_EXPEDITION'
-                    : 'EN_ATTENTE_PAIEMENT';
+                    ? 'EN_ATTENTE_PAIEMENT'
+                    : 'PRET_EXPEDITION';
 
                 // 🔹 Date estimée d'arrivée
                 $service = ServiceTransport::find($request->service_id);

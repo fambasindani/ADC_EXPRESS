@@ -49,7 +49,7 @@ class Colis extends Model
 
     public function facture(): HasOne { return $this->hasOne(Facture::class); }
     public function paiements(): HasMany { return $this->hasMany(Paiement::class); }
-    public function historique(): HasMany { return $this->hasMany(HistoriqueColis::class)->orderBy('date_evenement'); }
+    public function historique(): HasMany { return $this->hasMany(HistoriqueColis::class)->orderByDesc('date_evenement'); }
     public function expeditions(): BelongsToMany
     {
         return $this->belongsToMany(Expedition::class, 'expedition_colis')
